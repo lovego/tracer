@@ -35,6 +35,9 @@ func (s *Span) Finish() {
 }
 
 func (s *Span) Tag(k string, v interface{}) {
+	if s == nil {
+		return
+	}
 	if s.Tags == nil {
 		s.Tags = make(map[string]interface{})
 	}
@@ -43,4 +46,16 @@ func (s *Span) Tag(k string, v interface{}) {
 
 func Context(ctx context.Context, s *Span) context.Context {
 	return context.WithValue(ctx, spanKey, s)
+}
+func Tag(ctx context.Context, k string, v interface{}) {
+	GetSpan(ctx).Tag(k, v)
+}
+
+func GetSpan(ctx context.Context) *Span {
+	if v := ctx.Value(spanKey); v != nil {
+		if s, ok := v.(*Span); ok {
+			return s
+		}
+	}
+	return nil
 }
