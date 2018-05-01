@@ -19,19 +19,22 @@ type Span struct {
 }
 
 func StartSpan(ctx context.Context, name string) *Span {
-	s := &Span{Name: name, At: time.Now()}
 	if ctx != nil {
 		if value := ctx.Value(spanKey); value != nil {
 			if parent, ok := value.(*Span); ok && parent != nil {
+				s := &Span{Name: name, At: time.Now()}
 				parent.Children = append(parent.Children, s)
+				return s
 			}
 		}
 	}
-	return s
+	return nil
 }
 
 func (s *Span) Finish() {
-	s.Duration = float64(time.Since(s.At)) / float64(time.Millisecond)
+	if s != nil {
+		s.Duration = float64(time.Since(s.At)) / float64(time.Millisecond)
+	}
 }
 
 func (s *Span) Tag(k string, v interface{}) {
@@ -45,8 +48,12 @@ func (s *Span) Tag(k string, v interface{}) {
 }
 
 func Context(ctx context.Context, s *Span) context.Context {
+	if s == nil {
+		return ctx
+	}
 	return context.WithValue(ctx, spanKey, s)
 }
+
 func Tag(ctx context.Context, k string, v interface{}) {
 	GetSpan(ctx).Tag(k, v)
 }

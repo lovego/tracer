@@ -9,12 +9,10 @@ import (
 )
 
 func TestStartSpan(t *testing.T) {
-	var span *Span
+	var span = &Span{Name: "root", At: time.Now()}
 	func() {
-		ctx := context.Background()
-		span = StartSpan(ctx, "root")
 		defer span.Finish()
-		ctx = Context(ctx, span)
+		ctx := Context(context.Background(), span)
 
 		testRunSpan(ctx, "task0")
 		testRunSpan(ctx, "task1", "t1.0", "t1.1", "t1.2")
