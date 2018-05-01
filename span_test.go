@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"testing"
+	"time"
 	// "github.com/lovego/xiaomei/utils"
 )
 
@@ -65,5 +66,25 @@ func testRunSpan(ctx context.Context, name string, children ...string) {
 			span := StartSpan(ctx, child)
 			defer span.Finish()
 		}()
+	}
+}
+
+func TestContext(t *testing.T) {
+	ctx := context.Background()
+	if ctx.Done() != nil {
+		t.Error("unexpected non nil Done.")
+	}
+	ctx, _ = context.WithTimeout(ctx, time.Second)
+	if ctx.Done() == nil {
+		t.Error("unexpected nil Done.")
+	}
+
+	k := struct{}{}
+	ctx = context.WithValue(ctx, k, 333)
+	if ctx.Done() == nil {
+		t.Error("unexpected nil Done.")
+	}
+	if ctx.Value(k) != 333 {
+		t.Error("unexpected value.")
 	}
 }
