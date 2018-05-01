@@ -10,19 +10,12 @@ type spanKeyStruct struct {
 
 var spanKey spanKeyStruct
 
-func SpanKey() spanKeyStruct {
-	return spanKey
-}
-
 type Span struct {
-	Name     string
-	At       time.Time
-	Duration float64 // milliseconds
-	Children []*Span
-}
-
-func (s *Span) Finish() {
-	s.Duration = float64(time.Since(s.At)) / float64(time.Millisecond)
+	Name     string                 `json:"name,omitempty"`
+	At       time.Time              `json:"at"`
+	Duration float64                `json:"duration"` // milliseconds
+	Children []*Span                `json:"children"`
+	Tags     map[string]interface{} `json:"tags"`
 }
 
 func StartSpan(ctx context.Context, name string) *Span {
@@ -35,4 +28,19 @@ func StartSpan(ctx context.Context, name string) *Span {
 		}
 	}
 	return s
+}
+
+func (s *Span) Finish() {
+	s.Duration = float64(time.Since(s.At)) / float64(time.Millisecond)
+}
+
+func (s *Span) Tag(k string, v interface{}) {
+	if s.Tags == nil {
+		s.Tags = make(map[string]interface{})
+	}
+	s.Tags[k] = v
+}
+
+func Context(ctx context.Context, s *Span) context.Context {
+	return context.WithValue(ctx, spanKey, s)
 }

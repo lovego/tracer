@@ -13,7 +13,7 @@ func TestStartSpan(t *testing.T) {
 		ctx := context.Background()
 		span = StartSpan(ctx, "root")
 		defer span.Finish()
-		ctx = context.WithValue(ctx, SpanKey(), span)
+		ctx = Context(ctx, span)
 
 		testRunSpan(ctx, "task0")
 		testRunSpan(ctx, "task1", "t1.0", "t1.1", "t1.2")
@@ -59,7 +59,7 @@ func testRunSpan(ctx context.Context, name string, children ...string) {
 	if len(children) == 0 {
 		return
 	}
-	ctx = context.WithValue(ctx, SpanKey(), span)
+	ctx = Context(ctx, span)
 	for _, child := range children {
 		func() {
 			span := StartSpan(ctx, child)
