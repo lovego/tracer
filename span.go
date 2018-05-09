@@ -14,8 +14,8 @@ type Span struct {
 	Name     string                 `json:"name,omitempty"`
 	At       time.Time              `json:"at"`
 	Duration float64                `json:"duration"` // milliseconds
-	Children []*Span                `json:"children"`
-	Tags     map[string]interface{} `json:"tags"`
+	Children []*Span                `json:"children,omitempty"`
+	Tags     map[string]interface{} `json:"tags,omitempty"`
 }
 
 func StartSpan(ctx context.Context, name string) *Span {
