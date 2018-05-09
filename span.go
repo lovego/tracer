@@ -37,14 +37,15 @@ func (s *Span) Finish() {
 	}
 }
 
-func (s *Span) Tag(k string, v interface{}) {
+func (s *Span) Tag(k string, v interface{}) *Span {
 	if s == nil {
-		return
+		return s
 	}
 	if s.Tags == nil {
 		s.Tags = make(map[string]interface{})
 	}
 	s.Tags[k] = v
+	return s
 }
 
 func Context(ctx context.Context, s *Span) context.Context {
