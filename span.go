@@ -60,9 +60,11 @@ func Tag(ctx context.Context, k string, v interface{}) {
 }
 
 func GetSpan(ctx context.Context) *Span {
-	if v := ctx.Value(spanKey); v != nil {
-		if s, ok := v.(*Span); ok {
-			return s
+	if ctx != nil {
+		if v := ctx.Value(spanKey); v != nil {
+			if s, ok := v.(*Span); ok {
+				return s
+			}
 		}
 	}
 	return nil
