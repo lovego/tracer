@@ -48,13 +48,12 @@ func (s *Span) Tag(k string, v interface{}) *Span {
 	return s
 }
 
-// Tag add a tag to a span
+// Debug add a tag to a span
 func (s *Span) Debug() bool {
 	if s != nil {
 		return s.debug
-	} else {
-		return false
 	}
+	return false
 }
 
 // SetDebug set if debugging tag should be traced.
@@ -65,7 +64,7 @@ func (s *Span) SetDebug(b bool) *Span {
 	return s
 }
 
-// Tag add a debug tag to a span
+// DebugTag add a debug tag to a span
 func (s *Span) DebugTag(k string, v interface{}) *Span {
 	if s == nil || !s.debug {
 		return s
