@@ -8,6 +8,15 @@ import (
 	// "github.com/lovego/xiaomei/utils"
 )
 
+func TestStartSpanReturnNil(t *testing.T) {
+	if got := StartSpan(nil, "name"); got != nil {
+		t.Errorf("unexpected: %v", got)
+	}
+	if got := StartSpan(context.Background(), "name"); got != nil {
+		t.Errorf("unexpected: %v", got)
+	}
+}
+
 func TestStartSpan(t *testing.T) {
 	var span = &Span{Name: "root", At: time.Now()}
 	func() {
@@ -52,6 +61,33 @@ func TestStartSpan(t *testing.T) {
 	}
 }
 
+func TestSpanTag(t *testing.T) {
+	var span *Span
+	if span.Debug() {
+		t.Errorf("unexpected Debug(): true")
+	}
+	span.Tag("k", "v")
+
+	span = (&Span{}).Tag("k", "v")
+	if len(span.Tags) != 1 || span.Tags["k"] != "v" {
+		t.Errorf("unexpected Tags: %v", span.Tags)
+	}
+}
+
+func TestSpanDebugTag(t *testing.T) {
+	span := (&Span{}).DebugTag("k", "v")
+	if len(span.Tags) != 0 {
+		t.Errorf("unexpected Tags: %v", span.Tags)
+	}
+	span.SetDebug(true).DebugTag("k", "v")
+	if len(span.Tags) != 1 || span.Tags["k"] != "v" {
+		t.Errorf("unexpected Tags: %v", span.Tags)
+	}
+	if !span.Debug() {
+		t.Errorf("unexpected Debug(): false")
+	}
+}
+
 func testRunSpan(ctx context.Context, name string, children ...string) {
 	span := StartSpan(ctx, name)
 	defer span.Finish()
@@ -64,25 +100,5 @@ func testRunSpan(ctx context.Context, name string, children ...string) {
 			span := StartSpan(ctx, child)
 			defer span.Finish()
 		}()
-	}
-}
-
-func TestContext(t *testing.T) {
-	ctx := context.Background()
-	if ctx.Done() != nil {
-		t.Error("unexpected non nil Done.")
-	}
-	ctx, _ = context.WithTimeout(ctx, time.Second)
-	if ctx.Done() == nil {
-		t.Error("unexpected nil Done.")
-	}
-
-	k := struct{}{}
-	ctx = context.WithValue(ctx, k, 333)
-	if ctx.Done() == nil {
-		t.Error("unexpected nil Done.")
-	}
-	if ctx.Value(k) != 333 {
-		t.Error("unexpected value.")
 	}
 }

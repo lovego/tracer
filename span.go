@@ -5,17 +5,13 @@ import (
 	"time"
 )
 
-type spanKeyStruct struct {
-}
-
-var spanKey spanKeyStruct
-
 type Span struct {
 	Name     string                 `json:"name,omitempty"`
 	At       time.Time              `json:"at"`
 	Duration float64                `json:"duration"` // milliseconds
 	Children []*Span                `json:"children,omitempty"`
 	Tags     map[string]interface{} `json:"tags,omitempty"`
+	debug    bool
 }
 
 func StartSpan(ctx context.Context, name string) *Span {
@@ -48,24 +44,28 @@ func (s *Span) Tag(k string, v interface{}) *Span {
 	return s
 }
 
-func Context(ctx context.Context, s *Span) context.Context {
-	if s == nil {
-		return ctx
+func (s *Span) Debug() bool {
+	if s != nil {
+		return s.debug
+	} else {
+		return false
 	}
-	return context.WithValue(ctx, spanKey, s)
 }
 
-func Tag(ctx context.Context, k string, v interface{}) {
-	GetSpan(ctx).Tag(k, v)
+func (s *Span) SetDebug(b bool) *Span {
+	if s != nil {
+		s.debug = b
+	}
+	return s
 }
 
-func GetSpan(ctx context.Context) *Span {
-	if ctx != nil {
-		if v := ctx.Value(spanKey); v != nil {
-			if s, ok := v.(*Span); ok {
-				return s
-			}
-		}
+func (s *Span) DebugTag(k string, v interface{}) *Span {
+	if s == nil || !s.debug {
+		return s
 	}
-	return nil
+	if s.Tags == nil {
+		s.Tags = make(map[string]interface{})
+	}
+	s.Tags[k] = v
+	return s
 }
