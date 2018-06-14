@@ -43,7 +43,8 @@ func TestContextDemo(t *testing.T) {
 	if ctx.Done() != nil {
 		t.Error("unexpected non nil Done.")
 	}
-	ctx, _ = context.WithTimeout(ctx, time.Second)
+	ctx, cancel = context.WithTimeout(ctx, time.Second)
+	defer cancel()
 	if ctx.Done() == nil {
 		t.Error("unexpected nil Done.")
 	}

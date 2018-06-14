@@ -55,7 +55,7 @@ func TestStartSpan(t *testing.T) {
 				t.Errorf("unexpected t%d.%d duration: %v", i, j, span.Children[i].Children[j].Duration)
 			}
 			if len(span.Children[i].Children[j].Children) != 0 {
-				t.Errorf("unexpected t%d.%d Children length: %d", i, len(span.Children[i].Children[j].Children))
+				t.Errorf("unexpected t%d.%d Children length: %d", i, j, len(span.Children[i].Children[j].Children))
 			}
 		}
 	}
