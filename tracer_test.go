@@ -7,6 +7,27 @@ import (
 	// "github.com/lovego/xiaomei/utils"
 )
 
+func TestContextDemo(t *testing.T) {
+	ctx := context.Background()
+	if ctx.Done() != nil {
+		t.Error("unexpected non nil Done.")
+	}
+	ctx, cancel := context.WithTimeout(ctx, time.Second)
+	defer cancel()
+	if ctx.Done() == nil {
+		t.Error("unexpected nil Done.")
+	}
+
+	k := struct{}{}
+	ctx = context.WithValue(ctx, k, 333)
+	if ctx.Done() == nil {
+		t.Error("unexpected nil Done.")
+	}
+	if ctx.Value(k) != 333 {
+		t.Error("unexpected value.")
+	}
+}
+
 func TestContext(t *testing.T) {
 	ctx := context.Background()
 	if got := Context(ctx, nil); got != ctx {
@@ -21,6 +42,12 @@ func TestStartContext(t *testing.T) {
 
 	if span.Children[0] != GetSpan(ctx) {
 		t.Errorf("unexpected span: %v", GetSpan(ctx))
+	}
+}
+
+func TestGetSpan(t *testing.T) {
+	if got := GetSpan(nil); got != nil {
+		t.Errorf("unexpected Context(ctx, nil): %v", got)
 	}
 }
 
@@ -42,29 +69,38 @@ func TestDebugTag(t *testing.T) {
 	}
 }
 
-func TestGetSpan(t *testing.T) {
-	if got := GetSpan(nil); got != nil {
-		t.Errorf("unexpected Context(ctx, nil): %v", got)
+func TestLog(t *testing.T) {
+	span := &Span{}
+	ctx := Context(context.Background(), span)
+	Log(ctx, "a ", "b")
+	if len(span.Logs) != 1 || span.Logs[0] != "a b" {
+		t.Errorf("unexpected Logs: %v", span.Logs)
 	}
 }
 
-func TestContextDemo(t *testing.T) {
-	ctx := context.Background()
-	if ctx.Done() != nil {
-		t.Error("unexpected non nil Done.")
+func TestLogf(t *testing.T) {
+	span := &Span{}
+	ctx := Context(context.Background(), span)
+	Logf(ctx, "a %s", "b")
+	if len(span.Logs) != 1 || span.Logs[0] != "a b" {
+		t.Errorf("unexpected Logs: %v", span.Logs)
 	}
-	ctx, cancel := context.WithTimeout(ctx, time.Second)
-	defer cancel()
-	if ctx.Done() == nil {
-		t.Error("unexpected nil Done.")
-	}
+}
 
-	k := struct{}{}
-	ctx = context.WithValue(ctx, k, 333)
-	if ctx.Done() == nil {
-		t.Error("unexpected nil Done.")
+func TestDebugLog(t *testing.T) {
+	span := &Span{debug: true}
+	ctx := Context(context.Background(), span)
+	DebugLog(ctx, "a ", "b")
+	if len(span.Logs) != 1 || span.Logs[0] != "a b" {
+		t.Errorf("unexpected Logs: %v", span.Logs)
 	}
-	if ctx.Value(k) != 333 {
-		t.Error("unexpected value.")
+}
+
+func TestDebugLogf(t *testing.T) {
+	span := &Span{debug: true}
+	ctx := Context(context.Background(), span)
+	DebugLogf(ctx, "a %s", "b")
+	if len(span.Logs) != 1 || span.Logs[0] != "a b" {
+		t.Errorf("unexpected Logs: %v", span.Logs)
 	}
 }

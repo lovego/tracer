@@ -17,19 +17,9 @@ func Context(ctx context.Context, s *Span) context.Context {
 	return context.WithValue(ctx, spanKey, s)
 }
 
-// StartContext start a new context on the given context
+// StartContext start a new tracer context on the given tracer context
 func StartContext(ctx context.Context, name string) context.Context {
 	return context.WithValue(context.Background(), spanKey, StartSpan(ctx, name))
-}
-
-// Tag add a tag to tracer context
-func Tag(ctx context.Context, k string, v interface{}) {
-	GetSpan(ctx).Tag(k, v)
-}
-
-// DebugTag add a debug tag to tracer context
-func DebugTag(ctx context.Context, k string, v interface{}) {
-	GetSpan(ctx).DebugTag(k, v)
 }
 
 // GetSpan get span from a tracer context
@@ -42,4 +32,34 @@ func GetSpan(ctx context.Context) *Span {
 		}
 	}
 	return nil
+}
+
+// Tag add a tag to a tracer context
+func Tag(ctx context.Context, k string, v interface{}) {
+	GetSpan(ctx).Tag(k, v)
+}
+
+// DebugTag add a tag to a tracer context if debug is enabled
+func DebugTag(ctx context.Context, k string, v interface{}) {
+	GetSpan(ctx).DebugTag(k, v)
+}
+
+// Log add a log to a tracer context
+func Log(ctx context.Context, args ...interface{}) {
+	GetSpan(ctx).Log(args...)
+}
+
+// Logf add a log to a tracer context
+func Logf(ctx context.Context, format string, args ...interface{}) {
+	GetSpan(ctx).Logf(format, args...)
+}
+
+// DebugLog add a log to a tracer context if debug is enabled
+func DebugLog(ctx context.Context, args ...interface{}) {
+	GetSpan(ctx).DebugLog(args...)
+}
+
+// DebugLogf add a log to a tracer context if debug is enabled
+func DebugLogf(ctx context.Context, format string, args ...interface{}) {
+	GetSpan(ctx).DebugLogf(format, args...)
 }
