@@ -14,6 +14,16 @@ func TestContext(t *testing.T) {
 	}
 }
 
+func TestStartContext(t *testing.T) {
+	var span = &Span{Name: "root", At: time.Now()}
+	root := Context(context.Background(), span)
+	ctx := StartContext(root, "child")
+
+	if span.Children[0] != GetSpan(ctx) {
+		t.Errorf("unexpected span: %v", GetSpan(ctx))
+	}
+}
+
 func TestTag(t *testing.T) {
 	span := &Span{}
 	ctx := Context(context.Background(), span)
