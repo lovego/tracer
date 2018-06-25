@@ -61,9 +61,24 @@ func TestStartSpan(t *testing.T) {
 	}
 }
 
+func testRunSpan(ctx context.Context, name string, children ...string) {
+	span := StartSpan(ctx, name)
+	defer span.Finish()
+	if len(children) == 0 {
+		return
+	}
+	ctx = Context(ctx, span)
+	for _, child := range children {
+		func() {
+			span := StartSpan(ctx, child)
+			defer span.Finish()
+		}()
+	}
+}
+
 func TestSpanTag(t *testing.T) {
 	var span *Span
-	if span.Debug() {
+	if span.GetDebug() {
 		t.Errorf("unexpected Debug(): true")
 	}
 	span.Tag("k", "v")
@@ -83,22 +98,47 @@ func TestSpanDebugTag(t *testing.T) {
 	if len(span.Tags) != 1 || span.Tags["k"] != "v" {
 		t.Errorf("unexpected Tags: %v", span.Tags)
 	}
-	if !span.Debug() {
+	if !span.GetDebug() {
 		t.Errorf("unexpected Debug(): false")
 	}
 }
 
-func testRunSpan(ctx context.Context, name string, children ...string) {
-	span := StartSpan(ctx, name)
-	defer span.Finish()
-	if len(children) == 0 {
-		return
+func TestSpanLog(t *testing.T) {
+	var span *Span
+	span.Log("a", "b")
+
+	span = (&Span{}).Log("a ", "b")
+	if len(span.Logs) != 1 || span.Logs[0] != "a b" {
+		t.Errorf("unexpected Logs: %v", span.Logs)
 	}
-	ctx = Context(ctx, span)
-	for _, child := range children {
-		func() {
-			span := StartSpan(ctx, child)
-			defer span.Finish()
-		}()
+}
+
+func TestSpanLogf(t *testing.T) {
+	var span *Span
+	span.Logf("a %s", "b")
+
+	span = (&Span{}).Logf("a %s", "b")
+	if len(span.Logs) != 1 || span.Logs[0] != "a b" {
+		t.Errorf("unexpected Logs: %v", span.Logs)
+	}
+}
+
+func TestSpanDebugLog(t *testing.T) {
+	var span *Span
+	span.DebugLog("a", "b")
+
+	span = (&Span{}).SetDebug(true).DebugLog("a ", "b")
+	if len(span.Logs) != 1 || span.Logs[0] != "a b" {
+		t.Errorf("unexpected Logs: %v", span.Logs)
+	}
+}
+
+func TestSpanDebugLogf(t *testing.T) {
+	var span *Span
+	span.DebugLogf("a %s", "b")
+
+	span = (&Span{}).SetDebug(true).DebugLogf("a %s", "b")
+	if len(span.Logs) != 1 || span.Logs[0] != "a b" {
+		t.Errorf("unexpected Logs: %v", span.Logs)
 	}
 }

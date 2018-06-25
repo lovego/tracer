@@ -2,6 +2,7 @@ package tracer
 
 import (
 	"context"
+	"fmt"
 	"time"
 )
 
@@ -12,6 +13,7 @@ type Span struct {
 	Duration float64                `json:"duration"` // milliseconds
 	Children []*Span                `json:"children,omitempty"`
 	Tags     map[string]interface{} `json:"tags,omitempty"`
+	Logs     []string               `json:"logs,omitempty"`
 	debug    bool
 }
 
@@ -29,27 +31,15 @@ func StartSpan(ctx context.Context, name string) *Span {
 	return nil
 }
 
-// Finish a span
+// Finish finish a span
 func (s *Span) Finish() {
 	if s != nil {
 		s.Duration = float64(time.Since(s.At)) / float64(time.Millisecond)
 	}
 }
 
-// Tag add a tag to a span
-func (s *Span) Tag(k string, v interface{}) *Span {
-	if s == nil {
-		return s
-	}
-	if s.Tags == nil {
-		s.Tags = make(map[string]interface{})
-	}
-	s.Tags[k] = v
-	return s
-}
-
-// Debug add a tag to a span
-func (s *Span) Debug() bool {
+// GetDebug returns if debug is enabled
+func (s *Span) GetDebug() bool {
 	if s != nil {
 		return s.debug
 	}
@@ -64,7 +54,19 @@ func (s *Span) SetDebug(b bool) *Span {
 	return s
 }
 
-// DebugTag add a debug tag to a span
+// Tag add a tag to a span
+func (s *Span) Tag(k string, v interface{}) *Span {
+	if s == nil {
+		return s
+	}
+	if s.Tags == nil {
+		s.Tags = make(map[string]interface{})
+	}
+	s.Tags[k] = v
+	return s
+}
+
+// DebugTag add a tag to a span if debug is enabled
 func (s *Span) DebugTag(k string, v interface{}) *Span {
 	if s == nil || !s.debug {
 		return s
@@ -73,5 +75,41 @@ func (s *Span) DebugTag(k string, v interface{}) *Span {
 		s.Tags = make(map[string]interface{})
 	}
 	s.Tags[k] = v
+	return s
+}
+
+// Log add a log to a span using fmt.Sprint
+func (s *Span) Log(args ...interface{}) *Span {
+	if s == nil {
+		return s
+	}
+	s.Logs = append(s.Logs, fmt.Sprint(args...))
+	return s
+}
+
+// Logf add a log to a span using fmt.Sprintf
+func (s *Span) Logf(format string, args ...interface{}) *Span {
+	if s == nil {
+		return s
+	}
+	s.Logs = append(s.Logs, fmt.Sprintf(format, args...))
+	return s
+}
+
+// DebugLog add a log to a span using fmt.Sprint if debug is enabled
+func (s *Span) DebugLog(args ...interface{}) *Span {
+	if s == nil || !s.debug {
+		return s
+	}
+	s.Logs = append(s.Logs, fmt.Sprint(args...))
+	return s
+}
+
+// DebugLogf add a log to a span using fmt.Sprintf if debug is enabled
+func (s *Span) DebugLogf(format string, args ...interface{}) *Span {
+	if s == nil || !s.debug {
+		return s
+	}
+	s.Logs = append(s.Logs, fmt.Sprintf(format, args...))
 	return s
 }
