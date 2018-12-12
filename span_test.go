@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"testing"
 	"time"
-	// "github.com/lovego/xiaomei/utils"
 )
 
 func TestStartSpanReturnNil(t *testing.T) {
