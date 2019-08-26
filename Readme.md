@@ -1,5 +1,5 @@
 # tracer
-a trace helper for golang.
+a tracer for golang.
 
 [![Build Status](https://travis-ci.org/lovego/tracer.svg?branch=master)](https://travis-ci.org/lovego/tracer)
 [![Coverage Status](https://img.shields.io/coveralls/github/lovego/tracer/master.svg)](https://coveralls.io/github/lovego/tracer?branch=master)
@@ -12,14 +12,13 @@ a trace helper for golang.
 ## Usage
 ```go
 func main() {
-  span := &tracer.Span{ At: time.Now() }
-  defer span.Finish()
-  ctx := tracer.Context(context.Background(), span)
-  work(ctx)
-}
+  ctx := tracer.Start(context.Background(), "main")
+  defer tracer.Finish(ctx)
 
-func work(ctx context.Context) {
   tracer.Tag(ctx, "key", "value")
+  tracer.Logf(ctx, "%v %v", time.Now(), "event")
+ 
+  fmt.Println(tracer.Get(ctx))
 }
 ```
 

@@ -2,105 +2,83 @@ package tracer
 
 import (
 	"context"
-	"testing"
+	"fmt"
 	"time"
+
+	"github.com/lovego/maps"
 	// "github.com/lovego/xiaomei/utils"
 )
 
-func TestContextDemo(t *testing.T) {
+func ExampleContext() {
 	ctx := context.Background()
-	if ctx.Done() != nil {
-		t.Error("unexpected non nil Done.")
-	}
+	fmt.Println(ctx.Done())
+
 	ctx, cancel := context.WithTimeout(ctx, time.Second)
 	defer cancel()
-	if ctx.Done() == nil {
-		t.Error("unexpected nil Done.")
-	}
+	fmt.Println(ctx.Done() != nil)
 
 	k := struct{}{}
 	ctx = context.WithValue(ctx, k, 333)
-	if ctx.Done() == nil {
-		t.Error("unexpected nil Done.")
-	}
-	if ctx.Value(k) != 333 {
-		t.Error("unexpected value.")
-	}
+	fmt.Println(ctx.Done() != nil, ctx.Value(k))
+	// Output:
+	// <nil>
+	// true
+	// true 333
 }
 
-func TestContext(t *testing.T) {
-	ctx := context.Background()
-	if got := Context(ctx, nil); got != ctx {
-		t.Errorf("unexpected Context(ctx, nil): %v", got)
-	}
+func ExampleStart() {
+	ctx := Start(context.Background(), "name")
+	Start(ctx, "child1")
+	Start(ctx, "child2")
+	Finish(ctx)
+
+	tracer := Get(ctx)
+	fmt.Println(
+		tracer.Name, !tracer.At.IsZero(), tracer.Duration > 0, tracer.Tags, tracer.Logs,
+		len(tracer.Children), tracer.Children[0].Name, tracer.Children[1].Name,
+	)
+
+	// Output:
+	// name true true map[] [] 2 child1 child2
 }
 
-func TestStartContext(t *testing.T) {
-	var span = &Span{Name: "root", At: time.Now()}
-	root := Context(context.Background(), span)
-	ctx := StartContext(root, "child")
+func ExampleTag() {
+	ctx := Start(context.Background(), "name")
 
-	if span.Children[0] != GetSpan(ctx) {
-		t.Errorf("unexpected span: %v", GetSpan(ctx))
-	}
-}
-
-func TestGetSpan(t *testing.T) {
-	if got := GetSpan(nil); got != nil {
-		t.Errorf("unexpected Context(ctx, nil): %v", got)
-	}
-}
-
-func TestTag(t *testing.T) {
-	span := &Span{}
-	ctx := Context(context.Background(), span)
 	Tag(ctx, "k", "v")
-	if len(span.Tags) != 1 || span.Tags["k"] != "v" {
-		t.Errorf("unexpected Tags: %v", span.Tags)
-	}
+	fmt.Println(Get(ctx).Tags)
+
+	DebugTag(ctx, "debugKey", "debugValue")
+	fmt.Println(Get(ctx).Tags)
+	ctx = SetDebug(ctx)
+	DebugTag(ctx, "debugKey", "debugValue")
+	maps.Println(Get(ctx).Tags)
+
+	// Output:
+	// map[k:v]
+	// map[k:v]
+	// map[debugKey:debugValue k:v]
 }
 
-func TestDebugTag(t *testing.T) {
-	span := &Span{debug: true}
-	ctx := Context(context.Background(), span)
-	DebugTag(ctx, "k", "v")
-	if len(span.Tags) != 1 || span.Tags["k"] != "v" {
-		t.Errorf("unexpected Tags: %v", span.Tags)
-	}
-}
+func ExampleLog() {
+	ctx := Start(context.Background(), "name")
 
-func TestLog(t *testing.T) {
-	span := &Span{}
-	ctx := Context(context.Background(), span)
 	Log(ctx, "a ", "b")
-	if len(span.Logs) != 1 || span.Logs[0] != "a b" {
-		t.Errorf("unexpected Logs: %v", span.Logs)
-	}
-}
-
-func TestLogf(t *testing.T) {
-	span := &Span{}
-	ctx := Context(context.Background(), span)
+	fmt.Printf("%#v\n", Get(ctx).Logs)
 	Logf(ctx, "a %s", "b")
-	if len(span.Logs) != 1 || span.Logs[0] != "a b" {
-		t.Errorf("unexpected Logs: %v", span.Logs)
-	}
-}
+	fmt.Printf("%#v\n", Get(ctx).Logs)
 
-func TestDebugLog(t *testing.T) {
-	span := &Span{debug: true}
-	ctx := Context(context.Background(), span)
 	DebugLog(ctx, "a ", "b")
-	if len(span.Logs) != 1 || span.Logs[0] != "a b" {
-		t.Errorf("unexpected Logs: %v", span.Logs)
-	}
-}
-
-func TestDebugLogf(t *testing.T) {
-	span := &Span{debug: true}
-	ctx := Context(context.Background(), span)
 	DebugLogf(ctx, "a %s", "b")
-	if len(span.Logs) != 1 || span.Logs[0] != "a b" {
-		t.Errorf("unexpected Logs: %v", span.Logs)
-	}
+	fmt.Printf("%#v\n", Get(ctx).Logs)
+	ctx = SetDebug(ctx)
+	DebugLog(ctx, "a ", "b")
+	DebugLogf(ctx, "a %s", "b")
+	fmt.Printf("%#v\n", Get(ctx).Logs)
+
+	// Output:
+	// []string{"a b"}
+	// []string{"a b", "a b"}
+	// []string{"a b", "a b"}
+	// []string{"a b", "a b", "a b", "a b"}
 }
