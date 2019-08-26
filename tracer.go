@@ -28,6 +28,17 @@ func Start(ctx context.Context, name string) context.Context {
 	return context.WithValue(ctx, key, tracer)
 }
 
+// Start start a child tracer on the given context
+func StartChild(ctx context.Context, name string) context.Context {
+	parent := Get(ctx)
+	if parent == nil {
+		return ctx
+	}
+	tracer := &Tracer{Name: name, At: time.Now()}
+	parent.Children = append(parent.Children, tracer)
+	return context.WithValue(ctx, key, tracer)
+}
+
 // Finish finish the tracer on the given context
 func Finish(ctx context.Context) {
 	if tracer := Get(ctx); tracer != nil {
