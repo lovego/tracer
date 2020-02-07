@@ -3,10 +3,13 @@ package tracer
 import (
 	"context"
 	"fmt"
+	"sync"
 	"time"
 )
 
 type Tracer struct {
+	sync.Mutex
+
 	Name     string                 `json:"name,omitempty"`
 	At       time.Time              `json:"at"`
 	Duration float64                `json:"duration"` // milliseconds
@@ -52,7 +55,9 @@ func Tag(ctx context.Context, k string, v interface{}) {
 		if tracer.Tags == nil {
 			tracer.Tags = make(map[string]interface{})
 		}
+		tracer.Lock()
 		tracer.Tags[k] = v
+		tracer.Unlock()
 	}
 }
 
