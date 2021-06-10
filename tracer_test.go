@@ -4,8 +4,6 @@ import (
 	"context"
 	"fmt"
 	"time"
-
-	"github.com/lovego/maps"
 )
 
 func ExampleContext() {
@@ -51,7 +49,7 @@ func ExampleTag() {
 	fmt.Println(Get(ctx).Tags)
 	ctx = SetDebug(ctx)
 	DebugTag(ctx, "debugKey", "debugValue")
-	maps.Println(Get(ctx).Tags)
+	fmt.Println(Get(ctx).Tags)
 
 	// Output:
 	// map[k:v]

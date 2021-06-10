@@ -1,10 +1,10 @@
 # tracer
 a tracer for golang.
 
-[![Build Status](https://travis-ci.org/lovego/tracer.svg?branch=master)](https://travis-ci.org/lovego/tracer)
-[![Coverage Status](https://img.shields.io/coveralls/github/lovego/tracer/master.svg)](https://coveralls.io/github/lovego/tracer?branch=master)
+[![Build Status](https://github.com/lovego/tracer/actions/workflows/go.yml/badge.svg)](https://github.com/lovego/tracer/actions/workflows/go.yml)
+[![Coverage Status](https://coveralls.io/repos/github/lovego/tracer/badge.svg?branch=master)](https://coveralls.io/github/lovego/tracer)
 [![Go Report Card](https://goreportcard.com/badge/github.com/lovego/tracer)](https://goreportcard.com/report/github.com/lovego/tracer)
-[![GoDoc](https://godoc.org/github.com/lovego/tracer?status.svg)](https://godoc.org/github.com/lovego/tracer)
+[![Documentation](https://pkg.go.dev/badge/github.com/lovego/tracer)](https://pkg.go.dev/github.com/lovego/tracer@v0.0.1)
 
 ## Install
 `$ go get github.com/lovego/tracer`
@@ -22,5 +22,3 @@ func main() {
 }
 ```
 
-## Documentation
-[https://godoc.org/github.com/lovego/tracer](https://godoc.org/github.com/lovego/tracer)
