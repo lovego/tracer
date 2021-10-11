@@ -2,6 +2,7 @@ package tracer
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"sync"
 	"time"
@@ -57,6 +58,19 @@ func Tag(ctx context.Context, k string, v interface{}) {
 		}
 		tracer.Lock()
 		tracer.Tags[k] = v
+		tracer.Unlock()
+	}
+}
+
+// TagString a tag Marshal to string and add to a tracer context
+func TagString(ctx context.Context, k string, v interface{}) {
+	if tracer := Get(ctx); tracer != nil {
+		if tracer.Tags == nil {
+			tracer.Tags = make(map[string]interface{})
+		}
+		b, _ := json.Marshal(v)
+		tracer.Lock()
+		tracer.Tags[k] = string(b)
 		tracer.Unlock()
 	}
 }

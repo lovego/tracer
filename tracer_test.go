@@ -57,6 +57,24 @@ func ExampleTag() {
 	// map[debugKey:debugValue k:v]
 }
 
+func ExampleTagString() {
+	ctx := Start(context.Background(), "name")
+
+	TagString(ctx, "k", map[string]string{"a": "b"})
+	fmt.Println(Get(ctx).Tags)
+
+	DebugTag(ctx, "debugKey", "debugValue")
+	fmt.Println(Get(ctx).Tags)
+	ctx = SetDebug(ctx)
+	DebugTag(ctx, "debugKey", "debugValue")
+	fmt.Println(Get(ctx).Tags)
+
+	// Output:
+	// map[k:{"a":"b"}]
+	// map[k:{"a":"b"}]
+	// map[debugKey:debugValue k:{"a":"b"}]
+}
+
 func ExampleLog() {
 	ctx := Start(context.Background(), "name")
 
